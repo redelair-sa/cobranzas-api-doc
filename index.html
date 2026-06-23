@@ -18,30 +18,34 @@
       margin-left: auto; padding: 6px 10px; border-radius: 6px;
       border: 1px solid #444; background: #2a2a2c; color: #fff; font-size: 14px;
     }
-    elements-api { display: block; height: calc(100vh - 49px); }
+    #docs-container { height: calc(100vh - 49px); }
+    elements-api { display: block; height: 100%; }
   </style>
 </head>
 <body>
   <div class="topbar">
     <h1>API Intiza Cobranzas</h1>
     <select id="apiSelect" onchange="switchApi()">
-      <option value="reference/api-v2-auth.yaml">Autenticación (Api-Auth)</option>
       <option value="reference/api-v2.yaml">API v2 (Clientes, Facturas, Pagos)</option>
+      <option value="reference/api-v2-auth.yaml">Autenticación (Api-Auth)</option>
     </select>
   </div>
 
-  <elements-api
-    id="docs"
-    apiDescriptionUrl="reference/api-v2-auth.yaml"
-    router="hash"
-    layout="sidebar"
-  ></elements-api>
+  <div id="docs-container"></div>
 
   <script>
     function switchApi() {
       const url = document.getElementById('apiSelect').value;
-      document.getElementById('docs').setAttribute('apiDescriptionUrl', url);
+      const container = document.getElementById('docs-container');
+      container.innerHTML = '';
+      const el = document.createElement('elements-api');
+      el.setAttribute('apiDescriptionUrl', url);
+      el.setAttribute('router', 'hash');
+      el.setAttribute('layout', 'sidebar');
+      container.appendChild(el);
     }
+    // Render inicial
+    switchApi();
   </script>
 </body>
 </html>
