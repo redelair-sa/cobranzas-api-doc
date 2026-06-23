@@ -17,5 +17,69 @@
     router="hash"
     layout="sidebar"
   ></elements-api>
+
+  <script>
+  /*
+   * Stoplight Elements colapsa los grupos del sidebar cuando hay más de un tag.
+   * Este script expande cualquier grupo cerrado al cargar y vuelve a hacerlo
+   * si el sidebar se re-renderiza (cambio de ruta, etc.).
+   *
+   * Es defensivo a propósito: el DOM interno de Elements no es una API estable,
+   * así que cubre varias formas de detectar un grupo colapsado.
+   */
+  (function () {
+    function isInSidebar(el) {
+      return !!el.closest(
+        '[data-testid="sidebar"], [class*="sidebar" i], nav, aside'
+      );
+    }
+
+    function expandAll() {
+      var clicked = 0;
+
+      // Estrategia 1: toggles con aria-expanded="false" dentro del sidebar.
+      document.querySelectorAll('[aria-expanded="false"]').forEach(function (el) {
+        if (isInSidebar(el)) { el.click(); clicked++; }
+      });
+
+      // Estrategia 2 (fallback): cabeceras de grupo cuyo contenido esté oculto.
+      // Algunos builds usan un botón/encabezado sin aria-expanded explícito.
+      if (clicked === 0) {
+        document
+          .querySelectorAll('[role="button"], button')
+          .forEach(function (el) {
+            if (!isInSidebar(el)) return;
+            var txt = (el.textContent || "").trim().toLowerCase();
+            if (txt === "autenticación" || txt === "autenticacion" || txt === "api") {
+              // Si el siguiente bloque de enlaces no es visible, clic para abrir.
+              var sib = el.nextElementSibling;
+              if (!sib || sib.offsetParent === null) { el.click(); clicked++; }
+            }
+          });
+      }
+      return clicked;
+    }
+
+    // Reintenta mientras Elements carga el spec (async).
+    var tries = 0;
+    var iv = setInterval(function () {
+      tries++;
+      if (document.querySelectorAll('[aria-expanded], nav a, aside a').length > 0) {
+        expandAll();
+      }
+      if (tries > 30) clearInterval(iv); // ~6s
+    }, 200);
+
+    // Reengancha si el sidebar cambia (navegación interna).
+    var root = document.querySelector('elements-api');
+    if (root && window.MutationObserver) {
+      var debounce;
+      new MutationObserver(function () {
+        clearTimeout(debounce);
+        debounce = setTimeout(expandAll, 150);
+      }).observe(root, { childList: true, subtree: true });
+    }
+  })();
+  </script>
 </body>
 </html>
