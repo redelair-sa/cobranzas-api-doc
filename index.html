@@ -7,45 +7,15 @@
   <link rel="stylesheet" href="https://unpkg.com/@stoplight/elements@8.4.3/styles.min.css" />
   <script src="https://unpkg.com/@stoplight/elements@8.4.3/web-components.min.js"></script>
   <style>
-    body { margin: 0; font-family: sans-serif; }
-    .topbar {
-      display: flex; align-items: center; gap: 16px;
-      padding: 10px 20px; background: #1c1c1e; color: #fff;
-      border-bottom: 1px solid #333;
-    }
-    .topbar h1 { font-size: 16px; margin: 0; font-weight: 600; }
-    .topbar select {
-      margin-left: auto; padding: 6px 10px; border-radius: 6px;
-      border: 1px solid #444; background: #2a2a2c; color: #fff; font-size: 14px;
-    }
-    #docs-container { height: calc(100vh - 49px); }
-    elements-api { display: block; height: 100%; }
+    body { margin: 0; }
+    elements-api { display: block; height: 100vh; }
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <h1>API Intiza Cobranzas</h1>
-    <select id="apiSelect" onchange="switchApi()">
-      <option value="reference/api-v2.yaml">API v2 (Clientes, Facturas, Pagos)</option>
-      <option value="reference/api-v2-auth.yaml">Autenticación (Api-Auth)</option>
-    </select>
-  </div>
-
-  <div id="docs-container"></div>
-
-  <script>
-    function switchApi() {
-      const url = document.getElementById('apiSelect').value;
-      const container = document.getElementById('docs-container');
-      container.innerHTML = '';
-      const el = document.createElement('elements-api');
-      el.setAttribute('apiDescriptionUrl', url);
-      el.setAttribute('router', 'hash');
-      el.setAttribute('layout', 'sidebar');
-      container.appendChild(el);
-    }
-    // Render inicial
-    switchApi();
-  </script>
+  <elements-api
+    apiDescriptionUrl="reference/intiza-api.yaml"
+    router="hash"
+    layout="sidebar"
+  ></elements-api>
 </body>
 </html>

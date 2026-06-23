@@ -1,0 +1,451 @@
+openapi: 3.1.0
+info:
+  version: '2.0'
+  title: API Intiza Cobranzas
+  summary: API v2 de Intiza Cobranzas
+  description: "Este artículo contiene la documentación necesaria para el desarrollo de la integración con la API de escritura de datos de Clientes, Facturas y Pagos de **Intiza Cobranzas**.\r\n\r\n**Intiza** provee para este fin una URL donde deberán hacerse los POST necesarios para entregar la información.\r\n\r\nPor medio de esta API los clientes puede realizar las siguientes acciones:\r\n\r\n- Cargar en Intiza datos de clientes\r\n- Cargar en Intiza datos de facturas\r\n- Cargar en Intiza datos de pagos\r\n\r\nEl servicio es una API Rest, que admite y entrega información con el formato json.\r\n\r\nCada llamada a los métodos del servicio deberá estar autenticada con un token que debe haber sido previamente obtenido con el endpoint Authenticate de API-Auth\r\n\r\nTodos los registros enviados deberán informar el valor **Company_ID** previamente provisto por Intiza que\r\nindicará a qué empresa deben enviarse los datos recibidos via API.\r\n\r\nTodos los métodos de carga retornarán una\
+    \ respuesta en la que indicará el resultado de la operación. \r\nEn todas las llamadas será necesario que el integrador prevea la posibilidad de que la API retorne un código de error. Este código de error indicará cuál es el problema encontrado.\r\n\r\nPor otra parte, Intiza informará también cuantos registros recibió y cuántos pudo procesar exitosamente. \r\nEn caso de encontrar registros con problemas que impidan su ejecución, indicará en la respuesta para cada uno la razón que impidió su procesamiento.\r\n\r\nTodas las llamadas a los métodos de envío de información, tienen un límite máximo de 100 registros. \r\nDe ser necesario actualizar más registros, pueden realizarse varias llamadas.\r\n\r\nEn todos los casos, Intiza utlizará el valor del ID de la entidad (Client_ID, Invoice_ID o Payment_ID) para\r\ndeterminar si se trata de un registro nuevo que deberá crear o de una actualización de un cliente existente."
+servers:
+- url: https://backc.intiza.com/apiv2
+  description: Live
+tags:
+- name: Autenticación
+  description: "Este artículo contiene la documentación necesaria para la obtención de un token de autenticación para poder operar con las API \r\nde **Intiza Cobranzas**.\r\n\r\n**Intiza** provee para este fin una URL donde deberá hacers el POST necesario, incluyendo el usuario y \r\ncontraseña previamente provistas por Intiza para obtener el token.\r\n\r\nCada token tendrá una vigencia máxima de 60 minutos.\r\n\r\nEl servicio es una API Rest, que admite y entrega información con el formato json."
+- name: API
+  description: Carga y edición de clientes, facturas, pagos y cotizaciones.
+paths:
+  /authenticate:
+    post:
+      summary: Authenticate
+      description: Obtener token de autorización para la API
+      operationId: post-authenticate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uid:
+                  type: string
+                pwd:
+                  type: string
+              x-examples:
+                Example 1:
+                  uid: UID
+                  pwd: PWD
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                x-examples:
+                  Example 1:
+                    token: TOKEN
+      servers:
+      - url: https://authc.intiza.com/apiv2
+        description: Autenticación
+      tags:
+      - Autenticación
+  /setinvoices:
+    post:
+      summary: SetInvoices
+      description: Crear o editar facturas en Intiza Cobranzas
+      operationId: post-setinvoices
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  Additionals:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        Name:
+                          type: string
+                        Value:
+                          type: string
+                  Company_ID:
+                    type: string
+                    description: Provisto por Intiza
+                  Client_ID:
+                    type: string
+                    description: ID del cliente
+                  Invoice_ID:
+                    type: string
+                    description: ID de la factura
+                  Currency_ID:
+                    type: string
+                    description: "ID de la moneda\r\n"
+                  EmittedDate:
+                    type: string
+                    format: date
+                  Amount:
+                    type: integer
+                  ReferenceNumber:
+                    type: 'null'
+                  DueDate:
+                    type: string
+                    format: date
+                  Notes:
+                    type: 'null'
+                  Status:
+                    type:
+                    - string
+                    - 'null'
+              x-examples:
+                Example 1:
+                - Additionals:
+                  - Name: Servicio
+                    Value: Hosting
+                  - Name: IVA
+                    Value: 21%
+                  - Name: Póliza
+                    Value: API
+                  Company_ID: '100'
+                  Client_ID: '39339002'
+                  Invoice_ID: '400820'
+                  Currency_ID: $
+                  Group: null
+                  EmittedDate: '2012-04-23T18:25:43.511Z'
+                  Amount: 100
+                  ReferenceNumber: null
+                  DueDate: '2012-04-23T18:25:43.511Z'
+                  Notes: null
+                  Status: Normal 2
+                - Additionals:
+                  - Name: Servicio
+                    Value: Hosting
+                  - Name: IVA
+                    Value: 21%
+                  - Name: Póliza
+                    Value: API
+                  Company_ID: '100'
+                  Client_ID: '39339002'
+                  Invoice_ID: '326822'
+                  Currency_ID: $
+                  Group: null
+                  EmittedDate: '2012-04-23T18:25:43.511Z'
+                  Amount: 100
+                  ReferenceNumber: null
+                  DueDate: '2012-04-23T18:25:43.511Z'
+                  Notes: null
+                  Status: null
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Code:
+                    type: integer
+                  Description:
+                    type: string
+                  Received:
+                    type: integer
+                  Processed:
+                    type: integer
+                  Errors:
+                    type: array
+                    description: "Posibles retornos:\r\nOK = 0,\r\nUser_Pass_Invalid = 1,\r\nNoAccess = 2,\r\nInvalid_Company_ID = 3,\r\nInvalid_Client_ID = 4,\r\nInvalid_Invoice_ID = 5,\r\nInvalid_Additional = 6,\r\nMaximum_Reached = 7,\r\nEmpty = 8,\r\nAmount0 = 9,\r\nInvalid_Currency_ID = 10,\r\nInvalidType = 11,\r\nInvalidTransactionType = 12,\r\nEmtpy_ID = 13"
+                    items:
+                      type: object
+                      properties:
+                        ID:
+                          type: string
+                        Description:
+                          type: string
+                x-examples:
+                  Example 1:
+                    Code: 6
+                    Description: 'CEA0A2444D904384B7E5CF001ACDB85E: No existe Additional: Cuenta bancaria1'
+                    Received: 1
+                    Processed: 0
+                    Errors:
+                    - ID: CEA0A2444D904384B7E5CF001ACDB85E
+                      Description: 'No existe Additional: Cuenta bancaria1'
+        '400':
+          description: Bad Request
+      security:
+      - TOKEN: []
+      servers:
+      - url: https://backc.intiza.com/apiv2
+        description: Live
+      tags:
+      - API
+  /setpayments:
+    post:
+      summary: SetPayments
+      description: Crear o editar pagos de facturas existentes en Intiza
+      operationId: post-setpayments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  Additionals:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        value:
+                          type: string
+                  Company_ID:
+                    type: string
+                  Client_ID:
+                    type: string
+                  Invoice_ID:
+                    type: string
+                  Payment_ID:
+                    type: string
+                  Amount:
+                    type: integer
+                  Date:
+                    type: string
+                  Notes:
+                    type: string
+                  Type:
+                    type: string
+              x-examples:
+                Example 1:
+                - Additionals:
+                  - name: Cuenta bancaria1
+                    value: '021264'
+                  - name: Banco
+                    value: Santander
+                  Company_ID: '100'
+                  Client_ID: '39339002'
+                  Invoice_ID: '350814'
+                  Payment_ID: CEA0A2444D904384B7E5CF001ACDB85E
+                  Amount: 4840
+                  Date: 2024-10-23Z
+                  Notes: ''
+                  Type: Pago
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Code:
+                    type: integer
+                  Description:
+                    type: string
+                  Received:
+                    type: integer
+                  Processed:
+                    type: integer
+                  Errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        ID:
+                          type: string
+                        Description:
+                          type: string
+                x-examples:
+                  Example 1:
+                    Code: 6
+                    Description: 'CEA0A2444D904384B7E5CF001ACDB85E: No existe Additional: Cuenta bancaria1'
+                    Received: 1
+                    Processed: 0
+                    Errors:
+                    - ID: CEA0A2444D904384B7E5CF001ACDB85E
+                      Description: 'No existe Additional: Cuenta bancaria1'
+      security:
+      - TOKEN: []
+      servers:
+      - url: https://backc.intiza.com/apiv2
+        description: Live
+      tags:
+      - API
+  /setclients:
+    post:
+      summary: SetClients
+      description: Crear o Editar clientes en Intiza Cobranzas
+      operationId: post-setclients
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  Additionals:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        Name:
+                          type: string
+                        Value:
+                          type: string
+                  Company_ID:
+                    type: string
+                  Client_ID:
+                    type: string
+                  Name:
+                    type: 'null'
+                  Contact:
+                    type: 'null'
+                  Phone:
+                    type: 'null'
+                  Email:
+                    type: 'null'
+                  Address:
+                    type: 'null'
+                  Notes:
+                    type: 'null'
+                  CreditLimit:
+                    type: 'null'
+              x-examples:
+                Example 1:
+                - Additionals:
+                  - Name: Provincia
+                    Value: Buenos Aires
+                  - Name: Celular
+                    Value: '1153379291'
+                  Company_ID: '100'
+                  Client_ID: '39339002'
+                  Name: null
+                  Contact: null
+                  Phone: null
+                  Email: null
+                  Address: null
+                  Notes: null
+                  CreditLimit: null
+      responses: {}
+      security:
+      - TOKEN: []
+      servers:
+      - url: https://backc.intiza.com/apiv2
+        description: Live
+      tags:
+      - API
+  /setcurrencyrate:
+    post:
+      summary: SetCurrencyRate
+      description: Enviar cotizaciones de monedas a una empresa
+      operationId: post-setcurrencyrate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                company_id:
+                  type: string
+                rate:
+                  type: number
+              x-examples:
+                Example 1:
+                  code: €
+                  company_id: '100'
+                  rate: 1.143264
+      responses:
+        '200':
+          description: OK
+      servers:
+      - url: https://backc.intiza.com/apiv2
+        description: Live
+      tags:
+      - API
+  /deletepayment:
+    post:
+      summary: DeletePayment
+      description: "Eliminar pago de una factura.\r\n<br/> <br/>\r\n**¡ATENCIÓN!**: Esta operación elimina el registro y no es posible recuperarlo"
+      operationId: post-deletepayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                company_id:
+                  type: integer
+                payment_id:
+                  type: integer
+              required:
+              - company_id
+              - payment_id
+              x-examples:
+                Example 1:
+                  id: '2'
+      responses:
+        '200':
+          description: OK
+      servers:
+      - url: https://backc.intiza.com/apiv2
+        description: Live
+      tags:
+      - API
+  /setinvoicedata:
+    post:
+      summary: SetInvoiceData
+      description: Editar valor de una factura
+      operationId: post-setinvoicedata
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                company_id:
+                  type: string
+                client_id:
+                  type: string
+                referencenumber:
+                  type: string
+                values:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      field:
+                        type: string
+                      value:
+                        type: string
+              x-examples:
+                Example 1:
+                  company_id: '1'
+                  client_id: '1006'
+                  referencenumber: 0001-00024123
+                  values:
+                  - field: status
+                    value: Promesa de pago
+                  - field: Fecha estado factura
+                    value: '2024-10-26'
+                  - field: Observaciones
+                    value: Compromiso de pago por el total adeudado.
+      responses: {}
+      servers:
+      - url: https://backc.intiza.com/apiv2
+        description: Live
+      tags:
+      - API
+components:
+  securitySchemes:
+    TOKEN:
+      type: http
+      scheme: bearer
