@@ -1,0 +1,45 @@
+openapi: 3.1.0
+info:
+  version: '2.0'
+  title: Api-Auth
+  summary: Autenticación para Api v2 de Intiza Cobranzas
+  description: "Este artículo contiene la documentación necesaria para la obtención de un token de autenticación para poder operar con las API \r\nde **Intiza Cobranzas**.\r\n\r\n**Intiza** provee para este fin una URL donde deberá hacers el POST necesario, incluyendo el usuario y \r\ncontraseña previamente provistas por Intiza para obtener el token.\r\n\r\nCada token tendrá una vigencia máxima de 60 minutos.\r\n\r\nEl servicio es una API Rest, que admite y entrega información con el formato json."
+servers:
+  - url: 'https://authc.intiza.com/apiv2/'
+    description: Autenticación
+paths:
+  /authenticate:
+    post:
+      summary: Authenticate
+      description: Obtener token de autorización para la API
+      operationId: post-authenticate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uid:
+                  type: string
+                pwd:
+                  type: string
+              x-examples:
+                Example 1:
+                  uid: UID
+                  pwd: PWD
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                x-examples:
+                  Example 1:
+                    token: TOKEN
+      servers:
+        - url: 'https://authc.intiza.com/apiv2/'
+          description: Autenticación
