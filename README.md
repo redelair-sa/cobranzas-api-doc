@@ -33,3 +33,5 @@ Validar antes de pushear:
 ```bash
 npx @redocly/cli lint reference/intiza-api.yaml
 ```
+
+
