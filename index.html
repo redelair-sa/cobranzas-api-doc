@@ -14,8 +14,7 @@
     body { margin: 0; }
     elements-api { display: block; height: 100vh; }
 
-    /* Ocultar el pie "Powered by Stoplight".
-       Cubre las variantes de marcado que usa Elements. */
+    /* Ocultar el pie "Powered by Stoplight" (solo CSS, sin JS) */
     a[href*="stoplight.io"],
     [class*="PoweredBy" i],
     [data-testid="powered-by"] {
@@ -29,63 +28,5 @@
     router="hash"
     layout="sidebar"
   ></elements-api>
-
-  <script>
-  /*
-   * 1) Expande los grupos del sidebar (Autenticación / API) al cargar.
-   * 2) Refuerza la ocultación del "Powered by Stoplight" por si el nodo
-   *    se inyecta después del render (cuando el CSS por sí solo no alcanza).
-   */
-  (function () {
-    function isInSidebar(el) {
-      return !!el.closest('[data-testid="sidebar"], [class*="sidebar" i], nav, aside');
-    }
-
-    function expandAll() {
-      var clicked = 0;
-      document.querySelectorAll('[aria-expanded="false"]').forEach(function (el) {
-        if (isInSidebar(el)) { el.click(); clicked++; }
-      });
-      if (clicked === 0) {
-        document.querySelectorAll('[role="button"], button').forEach(function (el) {
-          if (!isInSidebar(el)) return;
-          var txt = (el.textContent || "").trim().toLowerCase();
-          if (txt === "autenticación" || txt === "autenticacion" || txt === "api") {
-            var sib = el.nextElementSibling;
-            if (!sib || sib.offsetParent === null) { el.click(); clicked++; }
-          }
-        });
-      }
-      return clicked;
-    }
-
-    function hidePoweredBy() {
-      var nodes = document.querySelectorAll('a[href*="stoplight.io"]');
-      nodes.forEach(function (a) {
-        var wrap = a.closest('div, footer, p') || a;
-        wrap.style.display = "none";
-      });
-    }
-
-    var tries = 0;
-    var iv = setInterval(function () {
-      tries++;
-      if (document.querySelectorAll('[aria-expanded], nav a, aside a').length > 0) {
-        expandAll();
-      }
-      hidePoweredBy();
-      if (tries > 30) clearInterval(iv);
-    }, 200);
-
-    var root = document.querySelector('elements-api');
-    if (root && window.MutationObserver) {
-      var debounce;
-      new MutationObserver(function () {
-        clearTimeout(debounce);
-        debounce = setTimeout(function () { expandAll(); hidePoweredBy(); }, 150);
-      }).observe(root, { childList: true, subtree: true });
-    }
-  })();
-  </script>
 </body>
 </html>
