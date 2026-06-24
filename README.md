@@ -4,35 +4,32 @@ Documentación de la API v2 de Intiza Cobranzas, migrada desde Stoplight y rende
 
 ## Contenido
 
-- `reference/api-v2-auth.yaml` — Autenticación (obtención de token)
-- `reference/api-v2.yaml` — API v2: clientes, facturas, pagos, cotizaciones
-- `index.html` — Visor navegable (Stoplight Elements)
+- `reference/intiza-api.yaml` — **Spec unificado** que se publica. Dos secciones en el menú lateral: **Autenticación** y **API** (clientes, facturas, pagos, cotizaciones).
+- `reference/api-v2-auth.yaml` — spec original de autenticación (referencia).
+- `reference/api-v2.yaml` — spec original de la API v2 (referencia).
+- `index.html` — visor navegable (Stoplight Elements).
+- `vendor/elements/` — assets de Stoplight Elements **alojados localmente** (CSS + JS). La doc no depende de CDNs externos: todo se sirve desde el propio dominio.
+
+> El menú lateral se agrupa por los `tags` del spec. El orden de los grupos sigue el orden de la sección `tags` en `intiza-api.yaml` (primero Autenticación, luego API). Cada endpoint conserva su `servers` propio (auth usa `authc.intiza.com`, el resto `backc.intiza.com`).
 
 ## Ver la documentación
 
 ### Online (GitHub Pages)
-
-Una vez activado Pages, la doc queda disponible en:
-
 ```
 https://<usuario>.github.io/<repo>/
 ```
 
 ### Local
-
-Como `index.html` carga los YAML por fetch, necesitás un servidor local (no abrir el archivo directo):
-
 ```bash
 python3 -m http.server 8080
-# luego abrir http://localhost:8080
+# abrir http://localhost:8080
 ```
 
-## Editar la documentación
+## Editar
 
-Editá los archivos `.yaml` en `reference/`. Al hacer push a `main`, el GitHub Action republica Pages automáticamente.
+Editá `reference/intiza-api.yaml`. Para agregar/mover endpoints entre secciones, cambiá su `tags`. Al pushear a `main`, Pages se republica solo.
 
-Para validar los specs antes de pushear:
-
+Validar antes de pushear:
 ```bash
-npx @redocly/cli lint reference/api-v2.yaml reference/api-v2-auth.yaml
+npx @redocly/cli lint reference/intiza-api.yaml
 ```
