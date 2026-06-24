@@ -4,11 +4,20 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>API Intiza Cobranzas — Documentación</title>
-  <link rel="stylesheet" href="https://unpkg.com/@stoplight/elements@8.4.3/styles.min.css" />
-  <script src="https://unpkg.com/@stoplight/elements@8.4.3/web-components.min.js"></script>
+  <!-- Assets servidos desde el propio repo (sin dependencia de unpkg/Stoplight CDN) -->
+  <link rel="stylesheet" href="vendor/elements/styles.min.css" />
+  <script src="vendor/elements/web-components.min.js"></script>
   <style>
     body { margin: 0; }
     elements-api { display: block; height: 100vh; }
+
+    /* Ocultar el pie "Powered by Stoplight".
+       Cubre las variantes de marcado que usa Elements. */
+    a[href*="stoplight.io"],
+    [class*="PoweredBy" i],
+    [data-testid="powered-by"] {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
@@ -20,63 +29,57 @@
 
   <script>
   /*
-   * Stoplight Elements colapsa los grupos del sidebar cuando hay más de un tag.
-   * Este script expande cualquier grupo cerrado al cargar y vuelve a hacerlo
-   * si el sidebar se re-renderiza (cambio de ruta, etc.).
-   *
-   * Es defensivo a propósito: el DOM interno de Elements no es una API estable,
-   * así que cubre varias formas de detectar un grupo colapsado.
+   * 1) Expande los grupos del sidebar (Autenticación / API) al cargar.
+   * 2) Refuerza la ocultación del "Powered by Stoplight" por si el nodo
+   *    se inyecta después del render (cuando el CSS por sí solo no alcanza).
    */
   (function () {
     function isInSidebar(el) {
-      return !!el.closest(
-        '[data-testid="sidebar"], [class*="sidebar" i], nav, aside'
-      );
+      return !!el.closest('[data-testid="sidebar"], [class*="sidebar" i], nav, aside');
     }
 
     function expandAll() {
       var clicked = 0;
-
-      // Estrategia 1: toggles con aria-expanded="false" dentro del sidebar.
       document.querySelectorAll('[aria-expanded="false"]').forEach(function (el) {
         if (isInSidebar(el)) { el.click(); clicked++; }
       });
-
-      // Estrategia 2 (fallback): cabeceras de grupo cuyo contenido esté oculto.
-      // Algunos builds usan un botón/encabezado sin aria-expanded explícito.
       if (clicked === 0) {
-        document
-          .querySelectorAll('[role="button"], button')
-          .forEach(function (el) {
-            if (!isInSidebar(el)) return;
-            var txt = (el.textContent || "").trim().toLowerCase();
-            if (txt === "autenticación" || txt === "autenticacion" || txt === "api") {
-              // Si el siguiente bloque de enlaces no es visible, clic para abrir.
-              var sib = el.nextElementSibling;
-              if (!sib || sib.offsetParent === null) { el.click(); clicked++; }
-            }
-          });
+        document.querySelectorAll('[role="button"], button').forEach(function (el) {
+          if (!isInSidebar(el)) return;
+          var txt = (el.textContent || "").trim().toLowerCase();
+          if (txt === "autenticación" || txt === "autenticacion" || txt === "api") {
+            var sib = el.nextElementSibling;
+            if (!sib || sib.offsetParent === null) { el.click(); clicked++; }
+          }
+        });
       }
       return clicked;
     }
 
-    // Reintenta mientras Elements carga el spec (async).
+    function hidePoweredBy() {
+      var nodes = document.querySelectorAll('a[href*="stoplight.io"]');
+      nodes.forEach(function (a) {
+        var wrap = a.closest('div, footer, p') || a;
+        wrap.style.display = "none";
+      });
+    }
+
     var tries = 0;
     var iv = setInterval(function () {
       tries++;
       if (document.querySelectorAll('[aria-expanded], nav a, aside a').length > 0) {
         expandAll();
       }
-      if (tries > 30) clearInterval(iv); // ~6s
+      hidePoweredBy();
+      if (tries > 30) clearInterval(iv);
     }, 200);
 
-    // Reengancha si el sidebar cambia (navegación interna).
     var root = document.querySelector('elements-api');
     if (root && window.MutationObserver) {
       var debounce;
       new MutationObserver(function () {
         clearTimeout(debounce);
-        debounce = setTimeout(expandAll, 150);
+        debounce = setTimeout(function () { expandAll(); hidePoweredBy(); }, 150);
       }).observe(root, { childList: true, subtree: true });
     }
   })();
