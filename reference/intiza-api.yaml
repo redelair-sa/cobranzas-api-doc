@@ -400,6 +400,64 @@ paths:
         description: Live
       tags:
       - API
+  /deleteinvoice:
+    post:
+      summary: DeleteInvoice
+      description: "Eliminar una factura de una empresa, identificada por su ID externo (el mismo `Invoice_ID` enviado en SetInvoices).\r\n<br/> <br/>\r\n**¡ATENCIÓN!**: Esta operación elimina la factura junto con sus pagos y archivos adjuntos, y no es posible recuperarlos"
+      operationId: post-deleteinvoice
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                company_id:
+                  type: string
+                  description: ID de la empresa
+                invoice_id:
+                  type: string
+                  description: ID externo de la factura
+              required:
+              - company_id
+              - invoice_id
+              x-examples:
+                Example 1:
+                  company_id: '100'
+                  invoice_id: FAC-0001
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Code:
+                    type: integer
+                  Description:
+                    type: string
+                  Received:
+                    type: integer
+                  Processed:
+                    type: integer
+              examples:
+                Example 1:
+                  value:
+                    Code: 0
+                    Description: OK
+                    Received: 1
+                    Processed: 1
+        '400':
+          description: "Solicitud inválida. El cuerpo es `{ \"Message\": \"<motivo>\" }`, donde el motivo es `ID Empty` (falta company_id o invoice_id), `No existe Company_ID: {company_id}` (empresa inexistente o sin acceso) o `Invalid Invoice_ID: {invoice_id}` (no existe una factura con ese ID externo)"
+        '401':
+          description: Token inválido o ausente
+      security:
+      - TOKEN: []
+      servers:
+      - url: https://backc.intiza.com/apiv2
+        description: Live
+      tags:
+      - API
   /setinvoicedata:
     post:
       summary: SetInvoiceData
